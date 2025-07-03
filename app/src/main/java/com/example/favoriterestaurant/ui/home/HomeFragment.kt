@@ -4,10 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
 import android.widget.TextView
+import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.favoriterestaurant.databinding.FragmentHomeBinding
+
+import java.util.ArrayList
+import kotlin.collections.MutableList
 
 class HomeFragment : Fragment() {
 
@@ -22,16 +28,21 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        val listView: ListView = binding.listView
+
+        val itemList: MutableList<String> = mutableListOf()
+
+        for (i in 0 until 30) {
+            itemList.add(i.toString())
         }
+
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, itemList)
+
+        listView.adapter = adapter
+
         return root
     }
 
