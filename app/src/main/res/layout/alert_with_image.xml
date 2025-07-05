@@ -5,10 +5,32 @@
     android:layout_height="wrap_content"
     android:gravity="center">
 
+    <EditText
+        android:id="@+id/editName"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:textSize="@dimen/title_textSize"
+        android:textStyle="bold"
+        android:hint="@string/name_hint" />
+
     <ImageView
         android:id="@+id/dialogImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
         android:scaleType="centerCrop"
         android:src="@drawable/image0" />
+
+    <EditText
+        android:id="@+id/editDesc"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="@string/desc_hint"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:textSize="@dimen/desc_textSize"
+        />
+
 </LinearLayout>

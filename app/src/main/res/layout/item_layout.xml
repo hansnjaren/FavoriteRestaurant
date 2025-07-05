@@ -2,22 +2,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/uriView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="uri"
-        android:textSize="14sp"
-        android:textColor="#444444" />
+    android:padding="@dimen/default_margin"
+    android:orientation="vertical"
+    android:layout_margin="8dp"
+    android:background="#dddddd">
 
     <TextView
         android:id="@+id/nameView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="name"
-        android:textSize="16sp"
+        android:text="@string/name_holder"
+        android:textSize="@dimen/title_textSize"
+        android:textStyle="bold"
         android:textColor="#222222" />
+
+    <TextView
+        android:id="@+id/descView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/desc_holder"
+        android:textSize="@dimen/desc_textSize"
+        android:textColor="#222222" />
+
 </LinearLayout>
