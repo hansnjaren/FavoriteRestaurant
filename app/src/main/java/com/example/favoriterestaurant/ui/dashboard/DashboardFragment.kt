@@ -53,13 +53,13 @@ class ImageAdapter(
         val uri = imageData.uri
         holder.imageView.setImageURI(uri)
 
-        if(selectList.size != imageList.size) selectList = MutableList(imageList.size) { _ -> false }
+        if (selectList.size != imageList.size) selectList =
+            MutableList(imageList.size) { _ -> false }
 
         val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
         if (selectList[position]) {
             params.setMargins(16)
-        }
-        else {
+        } else {
             params.setMargins(0)
         }
         holder.imageView.layoutParams = params
@@ -68,23 +68,21 @@ class ImageAdapter(
 
 
         holder.itemView.setOnClickListener {
-            if (selectMode){
+            if (selectMode) {
                 Log.d("selecting", "selecting pictures")
-                if (selectList.size != imageList.size){
+                if (selectList.size != imageList.size) {
                     selectList = MutableList(imageList.size) { _ -> false }
                 }
                 selectList[position] = !selectList[position]
                 val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
                 if (selectList[position]) {
                     params.setMargins(16)
-                }
-                else {
+                } else {
                     params.setMargins(0)
                 }
                 holder.imageView.layoutParams = params
                 holder.imageView.requestLayout()
-            }
-            else {
+            } else {
                 DialogUtils.showImageDialog(
                     context = holder.itemView.context,
                     imageData = imageData,
@@ -110,11 +108,11 @@ class ImageAdapter(
     // 데이터 갱신 메서드
     fun submitList(newItems: List<ImageItem>) {
         val uriList: MutableList<Uri> = mutableListOf()
-        for(image in imageList){
+        for (image in imageList) {
             uriList.add(image.uri)
         }
-        for(item in newItems){
-            if(!uriList.contains(item.uri)){
+        for (item in newItems) {
+            if (!uriList.contains(item.uri)) {
                 imageList.add(item)
             }
         }
@@ -145,8 +143,7 @@ class ImageAdapter(
                         imageList[position].uri,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
-                }
-                catch (e: SecurityException) {
+                } catch (e: SecurityException) {
                     // ignore
                 }
             }
@@ -168,7 +165,7 @@ class DashboardFragment : Fragment() {
     ) { uris ->
         if (uris.isNotEmpty()) {
             val images: MutableList<ImageItem> = mutableListOf()
-            for(uri in uris) {
+            for (uri in uris) {
                 requireContext().contentResolver.takePersistableUriPermission(
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION

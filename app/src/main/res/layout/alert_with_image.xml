@@ -1,27 +1,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:gravity="center">
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
 
     <EditText
         android:id="@+id/editName"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:hint="@string/name_hint"
         android:importantForAutofill="no"
         android:inputType="text"
+        android:maxLines="2"
+        android:minLines="1"
+        android:singleLine="true"
         android:textSize="@dimen/title_textSize"
-        android:textStyle="bold"
-        android:hint="@string/name_hint" />
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/dialogImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:importantForAccessibility="no"
-        android:scaleType="centerCrop"
-        android:src="@drawable/image0" />
+        android:scaleType="centerCrop" />
 
     <EditText
         android:id="@+id/editDesc"
@@ -30,7 +32,9 @@
         android:hint="@string/desc_hint"
         android:importantForAutofill="no"
         android:inputType="text"
-        android:textSize="@dimen/desc_textSize"
-        />
+        android:maxLines="5"
+        android:minLines="1"
+        android:singleLine="true"
+        android:textSize="@dimen/desc_textSize" />
 
 </LinearLayout>

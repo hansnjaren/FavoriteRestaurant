@@ -34,7 +34,7 @@ data class ImageItem(val uri: Uri, var name: String, var desc: String)
 
 val IMAGE_LIST_KEY = stringPreferencesKey("image_list")
 
-class UriAdapter: JsonSerializer<Uri>, JsonDeserializer<Uri> {
+class UriAdapter : JsonSerializer<Uri>, JsonDeserializer<Uri> {
     override fun serialize(
         src: Uri?,
         typeOfSrc: Type?,
@@ -66,7 +66,7 @@ suspend fun saveImageItemList(context: Context, itemList: List<ImageItem>) {
 fun getImageItemListFlow(context: Context): Flow<List<ImageItem>> {
     return context.dataStore.data.map { prefs ->
         val json = prefs[IMAGE_LIST_KEY] ?: "[]"
-        val type = object: TypeToken<List<ImageItem>>() {}.type
+        val type = object : TypeToken<List<ImageItem>>() {}.type
         gson.fromJson(json, type)
     }
 }

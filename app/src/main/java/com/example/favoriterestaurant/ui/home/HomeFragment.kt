@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +33,7 @@ class DataAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameView: TextView = view.findViewById(R.id.nameView)
         val descView: TextView = view.findViewById(R.id.descView)
+        val smallImageView: ImageView = view.findViewById(R.id.smallImage)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -49,8 +51,10 @@ class DataAdapter(
         val imageData = imageList[position]
         val name = imageData.name
         val desc = imageData.desc
+        val uri = imageData.uri
         listHolder.nameView.text = name
         listHolder.descView.text = desc
+        listHolder.smallImageView.setImageURI(uri)
         listHolder.itemView.setOnClickListener {
             DialogUtils.showImageDialog(
                 context = listHolder.itemView.context,
@@ -74,11 +78,11 @@ class DataAdapter(
 
     fun submitList(newItems: List<ImageItem>) {
         val uriList: MutableList<Uri> = mutableListOf()
-        for(image in imageList){
+        for (image in imageList) {
             uriList.add(image.uri)
         }
-        for(item in newItems){
-            if(!uriList.contains(item.uri)){
+        for (item in newItems) {
+            if (!uriList.contains(item.uri)) {
                 imageList.add(item)
             }
         }
@@ -94,6 +98,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
 
     private lateinit var adapter: DataAdapter
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!

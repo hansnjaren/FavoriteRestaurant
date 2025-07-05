@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Favorite Restaurant</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_home">List</string>
+    <string name="title_dashboard">Images</string>
+    <string name="title_notifications">Map</string>
     <string name="add_images">Add Images</string>
     <string name="name_holder">Name</string>
     <string name="desc_holder">Description</string>
