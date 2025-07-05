@@ -290,7 +290,7 @@ class DashboardFragment : Fragment() {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val recyclerView: RecyclerView = binding.recyclerView
+        val recyclerView: RecyclerView = binding.imageListView
 
         val buttonSelectImages = root.findViewById<Button>(R.id.buttonSelectImages)
 
