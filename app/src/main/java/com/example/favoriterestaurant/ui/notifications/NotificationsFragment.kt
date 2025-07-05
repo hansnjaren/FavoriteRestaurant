@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import android.app.AlertDialog
 import android.location.Geocoder
+import com.example.favoriterestaurant.R
 import java.util.Locale
 
 class NotificationsFragment : Fragment(), OnMapReadyCallback {
