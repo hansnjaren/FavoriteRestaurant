@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -33,6 +34,10 @@ class ImageAdapter(
     private val imageList: MutableList<ImageItem>
 ) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
+    var selectMode = false
+
+    private var selectList: MutableList<Boolean> = MutableList(imageList.size) { _ -> false }
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.imageView)
     }
@@ -47,23 +52,56 @@ class ImageAdapter(
         val imageData = imageList[position]
         val uri = imageData.uri
         holder.imageView.setImageURI(uri)
+
+        if(selectList.size != imageList.size) selectList = MutableList(imageList.size) { _ -> false }
+
+        val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+        if (selectList[position]) {
+            params.setMargins(16)
+        }
+        else {
+            params.setMargins(0)
+        }
+        holder.imageView.layoutParams = params
+        holder.imageView.requestLayout()
+
+
+
         holder.itemView.setOnClickListener {
-            DialogUtils.showImageDialog(
-                context = holder.itemView.context,
-                imageData = imageData,
-                imageList = imageList,
-                submitList = { newList -> submitList(newList) },
-                releasePermission = { uri ->
-                    try {
-                        holder.itemView.context.contentResolver.releasePersistableUriPermission(
-                            uri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        )
-                    } catch (e: SecurityException) {
-                        Log.d("MyTag", "no permission therefore not released")
-                    }
+            if (selectMode){
+                Log.d("selecting", "selecting pictures")
+                if (selectList.size != imageList.size){
+                    selectList = MutableList(imageList.size) { _ -> false }
                 }
-            )
+                selectList[position] = !selectList[position]
+                val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+                if (selectList[position]) {
+                    params.setMargins(16)
+                }
+                else {
+                    params.setMargins(0)
+                }
+                holder.imageView.layoutParams = params
+                holder.imageView.requestLayout()
+            }
+            else {
+                DialogUtils.showImageDialog(
+                    context = holder.itemView.context,
+                    imageData = imageData,
+                    imageList = imageList,
+                    submitList = { newList -> submitList(newList) },
+                    releasePermission = { uri ->
+                        try {
+                            holder.itemView.context.contentResolver.releasePersistableUriPermission(
+                                uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            )
+                        } catch (e: SecurityException) {
+                            // ignore
+                        }
+                    }
+                )
+            }
         }
     }
 
@@ -84,6 +122,38 @@ class ImageAdapter(
         CoroutineScope(Dispatchers.IO).launch {
             saveImageItemList(context, imageList)
         }
+    }
+
+    fun cancel() {
+        assert(imageList.size == selectList.size)
+        for (position in 0 until selectList.size) {
+            if (selectList[position]) {
+                selectList[position] = false
+                notifyItemChanged(position)
+            }
+        }
+    }
+
+    fun delete() {
+        assert(imageList.size == selectList.size)
+        var newList = imageList.toMutableList()
+        for (position in selectList.size - 1 downTo 0) {
+            if (selectList[position]) {
+                newList = newList.apply { removeAt(position) }
+                try {
+                    context.contentResolver.releasePersistableUriPermission(
+                        imageList[position].uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }
+                catch (e: SecurityException) {
+                    // ignore
+                }
+            }
+        }
+        imageList.clear()
+        imageList.addAll(newList)
+        submitList(newList)
     }
 }
 
@@ -119,11 +189,15 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        val view: View = binding.root
 
         val recyclerView: RecyclerView = binding.imageListView
 
-        val buttonSelectImages = root.findViewById<Button>(R.id.buttonSelectImages)
+        val buttonSelectImages = view.findViewById<Button>(R.id.buttonSelectImages)
+
+        val select = view.findViewById<Button>(R.id.select)
+        val delete = view.findViewById<Button>(R.id.delete)
+        val cancel = view.findViewById<Button>(R.id.cancel)
 
         adapter = ImageAdapter(requireContext(), imageList)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -139,7 +213,33 @@ class DashboardFragment : Fragment() {
             pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
-        return root
+        select.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: select, select mode: ${adapter.selectMode}")
+            select.visibility = View.GONE
+            delete.visibility = View.VISIBLE
+            cancel.visibility = View.VISIBLE
+        }
+
+        delete.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: delete, select mode: ${adapter.selectMode}")
+            adapter.delete()
+            select.visibility = View.VISIBLE
+            delete.visibility = View.GONE
+            cancel.visibility = View.GONE
+        }
+
+        cancel.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: cancel, select mode: ${adapter.selectMode}")
+            adapter.cancel()
+            select.visibility = View.VISIBLE
+            delete.visibility = View.GONE
+            cancel.visibility = View.GONE
+        }
+
+        return view
     }
 
     override fun onDestroyView() {

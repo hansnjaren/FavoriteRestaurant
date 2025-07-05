@@ -8,4 +8,7 @@
     <string name="desc_holder">Description</string>
     <string name="name_hint">Put name here. </string>
     <string name="desc_hint">Put descriptions here. </string>
+    <string name="select">Select</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
 </resources>
