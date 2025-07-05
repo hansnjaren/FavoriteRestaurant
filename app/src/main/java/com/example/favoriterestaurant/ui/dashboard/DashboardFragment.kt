@@ -2,7 +2,6 @@ package com.example.favoriterestaurant.ui.dashboard
 
 import android.content.Context
 import android.content.Intent
-import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -11,132 +10,33 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.net.toUri
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
+import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DiffUtil
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.favoriterestaurant.R
 import com.example.favoriterestaurant.databinding.FragmentDashboardBinding
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializationContext
-import com.google.gson.JsonSerializer
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import java.lang.reflect.Type
-import androidx.lifecycle.lifecycleScope
+import com.example.favoriterestaurant.utils.DialogUtils
+import com.example.favoriterestaurant.utils.ImageItem
+import com.example.favoriterestaurant.utils.getImageItemListFlow
+import com.example.favoriterestaurant.utils.imageList
+import com.example.favoriterestaurant.utils.saveImageItemList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-//data class MyItem(val title: String, val description: String, val image: String)
-//class MyAdapter(private val itemList: List<MyItem>) :
-//    RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
-//
-//    class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//        val titleView: TextView = itemView.findViewById(R.id.itemTitle)
-//        val descView: TextView = itemView.findViewById(R.id.itemDesc)
-//        val hardText: TextView = itemView.findViewById(R.id.hardText)
-//        val image: ImageView = itemView.findViewById(R.id.imageView)
-//    }
-//
-//    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-//        val view = LayoutInflater.from(parent.context)
-//            .inflate(R.layout.item_layout, parent, false)
-//        return MyViewHolder(view)
-//    }
-//
-//    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-//        val item = itemList[position]
-//        val context = holder.itemView.context
-//        holder.titleView.text = item.title
-//        holder.descView.text = item.description
-//        holder.hardText.text = "Hello, World!"
-//
-//        holder.image.setImageResource(context.resources.getIdentifier(item.image, "drawable", context.packageName))
-//
-//        holder.itemView.setOnClickListener {
-//            AlertDialog.Builder(holder.itemView.context)
-//                .setTitle(item.title)
-//                .setMessage("내용: ${item.description}")
-//                .setPositiveButton("확인", null)
-//                .show()
-//        }
-//    }
-//
-//    override fun getItemCount() = itemList.size
-//}
-
-val imageList: MutableList<ImageItem> = mutableListOf()
-
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "image_items")
-
-data class ImageItem(val uri: Uri, val name: String)
-
-val IMAGE_LIST_KEY = stringPreferencesKey("image_list")
-
-class UriAdapter: JsonSerializer<Uri>, JsonDeserializer<Uri> {
-    override fun serialize(
-        src: Uri?,
-        typeOfSrc: Type?,
-        context: JsonSerializationContext?
-    ): JsonElement {
-        return JsonPrimitive(src?.toString())
-    }
-
-    override fun deserialize(
-        json: JsonElement?,
-        typeOfT: Type?,
-        context: JsonDeserializationContext?
-    ): Uri {
-        return Uri.parse(json?.asString)
-    }
-}
-
-val gson: Gson = GsonBuilder()
-    .registerTypeAdapter(Uri::class.java, UriAdapter())
-    .create()
-
-suspend fun saveImageItemList(context: Context, itemList: List<ImageItem>) {
-    val json = gson.toJson(itemList)
-    context.dataStore.edit { prefs ->
-        prefs[IMAGE_LIST_KEY] = json
-    }
-}
-
-fun getImageItemListFlow(context: Context): Flow<List<ImageItem>> {
-    return context.dataStore.data.map { prefs ->
-        val json = prefs[IMAGE_LIST_KEY] ?: "[]"
-        val type = object: TypeToken<List<ImageItem>>() {}.type
-        gson.fromJson<List<ImageItem>>(json, type)
-    }
-}
 
 class ImageAdapter(
     private val context: Context,
     private val imageList: MutableList<ImageItem>
 ) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
+
+    var selectMode = false
+
+    private var selectList: MutableList<Boolean> = MutableList(imageList.size) { _ -> false }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.imageView)
@@ -151,50 +51,57 @@ class ImageAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val imageData = imageList[position]
         val uri = imageData.uri
-        val name = imageData.name
         holder.imageView.setImageURI(uri)
+
+        if(selectList.size != imageList.size) selectList = MutableList(imageList.size) { _ -> false }
+
+        val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+        if (selectList[position]) {
+            params.setMargins(16)
+        }
+        else {
+            params.setMargins(0)
+        }
+        holder.imageView.layoutParams = params
+        holder.imageView.requestLayout()
+
 
 
         holder.itemView.setOnClickListener {
-            val inflater = LayoutInflater.from(holder.itemView.context)
-            val dialogView = inflater.inflate(R.layout.alert_with_image, null)
-            val imageView = dialogView.findViewById<ImageView>(R.id.dialogImage)
-            imageView.setImageURI(uri)
-
-            var shouldReleasePermission = false
-
-            val dialog = AlertDialog.Builder(holder.itemView.context)
-                .setTitle(name)
-                .setView(dialogView)
-                .setPositiveButton("확인", null)
-                .setNegativeButton("삭제") { _, _ ->
-                    // 1. 리스트에서 이미지 제거
-                    val currentPosition = holder.adapterPosition
-                    if (currentPosition != RecyclerView.NO_POSITION) {
-                        val newList = imageList.toMutableList().apply { removeAt(currentPosition) }
-                        imageList.clear()
-                        imageList.addAll(newList)
-                        submitList(newList)
-                        shouldReleasePermission = true
-                    }
-                }.create()
-            dialog.setOnDismissListener {
-                // 2. 권한 반납
-                if(shouldReleasePermission) {
-                    Log.d("MyTag", "try release permission")
-                    try {
-                        holder.itemView.context.contentResolver.releasePersistableUriPermission(
-                            uri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        )
-                    } catch (e: SecurityException) {
-                        // 이미 권한이 없거나 예외 발생 시 무시
-                        Log.d("MyTag","no permission therefore not released")
-                    }
-                    shouldReleasePermission = false
+            if (selectMode){
+                Log.d("selecting", "selecting pictures")
+                if (selectList.size != imageList.size){
+                    selectList = MutableList(imageList.size) { _ -> false }
                 }
+                selectList[position] = !selectList[position]
+                val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+                if (selectList[position]) {
+                    params.setMargins(16)
+                }
+                else {
+                    params.setMargins(0)
+                }
+                holder.imageView.layoutParams = params
+                holder.imageView.requestLayout()
             }
-            dialog.show()
+            else {
+                DialogUtils.showImageDialog(
+                    context = holder.itemView.context,
+                    imageData = imageData,
+                    imageList = imageList,
+                    submitList = { newList -> submitList(newList) },
+                    releasePermission = { uri ->
+                        try {
+                            holder.itemView.context.contentResolver.releasePersistableUriPermission(
+                                uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            )
+                        } catch (e: SecurityException) {
+                            // ignore
+                        }
+                    }
+                )
+            }
         }
     }
 
@@ -211,50 +118,44 @@ class ImageAdapter(
                 imageList.add(item)
             }
         }
-        // imageList.addAll(newItems)
         notifyDataSetChanged()
         CoroutineScope(Dispatchers.IO).launch {
             saveImageItemList(context, imageList)
         }
     }
+
+    fun cancel() {
+        assert(imageList.size == selectList.size)
+        for (position in 0 until selectList.size) {
+            if (selectList[position]) {
+                selectList[position] = false
+                notifyItemChanged(position)
+            }
+        }
+    }
+
+    fun delete() {
+        assert(imageList.size == selectList.size)
+        var newList = imageList.toMutableList()
+        for (position in selectList.size - 1 downTo 0) {
+            if (selectList[position]) {
+                newList = newList.apply { removeAt(position) }
+                try {
+                    context.contentResolver.releasePersistableUriPermission(
+                        imageList[position].uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                }
+                catch (e: SecurityException) {
+                    // ignore
+                }
+            }
+        }
+        imageList.clear()
+        imageList.addAll(newList)
+        submitList(newList)
+    }
 }
-
-
-//class ImageAdapter : ListAdapter<Uri, ImageAdapter.ViewHolder>(DiffCallback()) {
-//
-//    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-//        val imageView: ImageView = view.findViewById(R.id.imageView)
-//    }
-//
-//    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-//        val view = LayoutInflater.from(parent.context)
-//            .inflate(R.layout.item_image, parent, false)
-//        return ViewHolder(view)
-//    }
-//
-//    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//        val uri = getItem(position)
-//        holder.imageView.setImageURI(uri)
-//
-//        val inflater = LayoutInflater.from(holder.itemView.context)
-//        val dialogView = inflater.inflate(R.layout.alert_with_image, null)
-//        val imageView = dialogView.findViewById<ImageView>(R.id.dialogImage)
-//        imageView.setImageURI(uri)
-//
-//        holder.itemView.setOnClickListener {
-//            AlertDialog.Builder(holder.itemView.context)
-//                .setTitle(uri.toString())
-//                .setView(dialogView)
-//                .setPositiveButton("확인", null)
-//                .show()
-//        }
-//    }
-//
-//    class DiffCallback : DiffUtil.ItemCallback<Uri>() {
-//        override fun areItemsTheSame(oldItem: Uri, newItem: Uri) = oldItem == newItem
-//        override fun areContentsTheSame(oldItem: Uri, newItem: Uri) = oldItem == newItem
-//    }
-//}
 
 class DashboardFragment : Fragment() {
 
@@ -272,7 +173,7 @@ class DashboardFragment : Fragment() {
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                images.add(ImageItem(uri = uri, name = uris.indexOf(uri).toString()))
+                images.add(ImageItem(uri = uri, name = "No name", desc = "No description"))
             }
             adapter.submitList(images) // RecyclerView에 이미지 URI 리스트 전달
         }
@@ -288,11 +189,15 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        val view: View = binding.root
 
-        val recyclerView: RecyclerView = binding.recyclerView
+        val recyclerView: RecyclerView = binding.imageListView
 
-        val buttonSelectImages = root.findViewById<Button>(R.id.buttonSelectImages)
+        val buttonSelectImages = view.findViewById<Button>(R.id.buttonSelectImages)
+
+        val select = view.findViewById<Button>(R.id.select)
+        val delete = view.findViewById<Button>(R.id.delete)
+        val cancel = view.findViewById<Button>(R.id.cancel)
 
         adapter = ImageAdapter(requireContext(), imageList)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -308,7 +213,33 @@ class DashboardFragment : Fragment() {
             pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
-        return root
+        select.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: select, select mode: ${adapter.selectMode}")
+            select.visibility = View.GONE
+            delete.visibility = View.VISIBLE
+            cancel.visibility = View.VISIBLE
+        }
+
+        delete.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: delete, select mode: ${adapter.selectMode}")
+            adapter.delete()
+            select.visibility = View.VISIBLE
+            delete.visibility = View.GONE
+            cancel.visibility = View.GONE
+        }
+
+        cancel.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: cancel, select mode: ${adapter.selectMode}")
+            adapter.cancel()
+            select.visibility = View.VISIBLE
+            delete.visibility = View.GONE
+            cancel.visibility = View.GONE
+        }
+
+        return view
     }
 
     override fun onDestroyView() {

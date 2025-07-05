@@ -2,33 +2,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="@dimen/default_margin"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_margin="8dp"
+    android:background="#dddddd">
 
     <TextView
-        android:id="@+id/itemTitle"
+        android:id="@+id/nameView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:text="@string/name_holder"
+        android:textSize="@dimen/title_textSize"
+        android:textStyle="bold"
+        android:textColor="#222222" />
 
     <TextView
-        android:id="@+id/itemDesc"
+        android:id="@+id/descView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="14sp" />
+        android:text="@string/desc_holder"
+        android:textSize="@dimen/desc_textSize"
+        android:textColor="#222222" />
 
-    <TextView
-        android:id="@+id/hardText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="12sp" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/image0"
-        android:contentDescription="0" />
 </LinearLayout>
