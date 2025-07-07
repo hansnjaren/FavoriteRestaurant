@@ -5,52 +5,49 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <EditText
-        android:id="@+id/editName"
+    <TextView
+        android:id="@+id/mapName"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:hint="@string/name_hint"
-        android:importantForAutofill="no"
-        android:inputType="text"
         android:maxLines="2"
         android:minLines="1"
         android:singleLine="true"
+        android:textColor="@color/black"
         android:textSize="@dimen/title_textSize"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/addressView"
+        android:id="@+id/mapAddressView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="@dimen/default_margin"
         android:textColor="@color/black"
         android:textSize="@dimen/desc_textSize" />
 
     <TextView
-        android:id="@+id/phoneNumberView"
+        android:id="@+id/mapPhoneNumberView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/default_margin"
         android:textColor="@color/black"
         android:textSize="@dimen/desc_textSize" />
 
     <ImageView
-        android:id="@+id/dialogImage"
+        android:id="@+id/mapDialogImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:importantForAccessibility="no"
-        android:scaleType="centerCrop"
-        android:textSize="@dimen/desc_textSize" />
+        android:scaleType="centerCrop" />
 
-    <EditText
-        android:id="@+id/editDesc"
+    <TextView
+        android:id="@+id/mapDesc"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:breakStrategy="simple"
-        android:hint="@string/desc_hint"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
         android:maxLines="5"
         android:minLines="1"
         android:singleLine="false"
+        android:textColor="@color/black"
         android:textSize="@dimen/desc_textSize" />
 
 </LinearLayout>

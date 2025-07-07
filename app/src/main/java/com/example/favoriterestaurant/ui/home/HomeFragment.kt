@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.favoriterestaurant.R
 import com.example.favoriterestaurant.databinding.FragmentHomeBinding
@@ -91,6 +92,36 @@ class DataAdapter(
             saveImageItemList(context, imageList)
         }
     }
+
+    fun moveItem(from: Int, to: Int) {
+        val item = imageList.removeAt(from)
+        imageList.add(to, item)
+        notifyItemMoved(from, to)
+    }
+}
+
+class ItemTouchHelperCallback(private val adapter: DataAdapter) : ItemTouchHelper.Callback() {
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
+        val swipeFlags = 0
+        return makeMovementFlags(dragFlags, swipeFlags)
+    }
+
+    override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
+        adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+        return true
+    }
+
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        // ignore since no swipe motion detection needed
+    }
 }
 
 class HomeFragment : Fragment() {
@@ -122,6 +153,10 @@ class HomeFragment : Fragment() {
                 adapter.submitList(loadedList)
             }
         }
+
+        val callback = ItemTouchHelperCallback(adapter)
+        val itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
 
         return root
     }

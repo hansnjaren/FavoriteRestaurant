@@ -16,6 +16,7 @@ import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.favoriterestaurant.R
 import com.example.favoriterestaurant.databinding.FragmentDashboardBinding
@@ -137,6 +138,7 @@ class ImageAdapter(
         var newList = imageList.toMutableList()
         for (position in selectList.size - 1 downTo 0) {
             if (selectList[position]) {
+                selectList[position] = false
                 newList = newList.apply { removeAt(position) }
                 try {
                     context.contentResolver.releasePersistableUriPermission(
@@ -151,6 +153,37 @@ class ImageAdapter(
         imageList.clear()
         imageList.addAll(newList)
         submitList(newList)
+    }
+
+    fun moveItem(from: Int, to: Int) {
+        val item = imageList.removeAt(from)
+        imageList.add(to, item)
+        notifyItemMoved(from, to)
+    }
+}
+
+class ItemTouchHelperCallback(private val adapter: ImageAdapter) : ItemTouchHelper.Callback() {
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        val dragFlags =
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        val swipeFlags = 0
+        return makeMovementFlags(dragFlags, swipeFlags)
+    }
+
+    override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
+        adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+        return true
+    }
+
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        // ignore since no swipe motion detection needed
     }
 }
 
@@ -170,9 +203,19 @@ class DashboardFragment : Fragment() {
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-                images.add(ImageItem(uri = uri, name = "No name", desc = "No description"))
+                images.add(
+                    ImageItem(
+                        uri = uri,
+                        name = "No name",
+                        desc = "No description",
+                        address = null,
+                        phoneNumber = null,
+                        coord = null,
+                        marker = null
+                    )
+                )
             }
-            adapter.submitList(images) // RecyclerView에 이미지 URI 리스트 전달
+            adapter.submitList(images)
         }
     }
 
@@ -205,6 +248,10 @@ class DashboardFragment : Fragment() {
                 adapter.submitList(loadedList)
             }
         }
+
+        val callback = ItemTouchHelperCallback(adapter)
+        val itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
 
         buttonSelectImages.setOnClickListener {
             pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))

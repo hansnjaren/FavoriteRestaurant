@@ -6,6 +6,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -25,12 +26,24 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.lang.reflect.Type
 import androidx.core.net.toUri
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.gson.JsonNull
+import com.google.gson.JsonObject
 
 val imageList: MutableList<ImageItem> = mutableListOf()
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "image_items")
 
-data class ImageItem(val uri: Uri, var name: String, var desc: String)
+data class ImageItem(
+    val uri: Uri,
+    var name: String,
+    var desc: String,
+    var address: String?,
+    var phoneNumber: String?,
+    var coord: LatLng?,
+    @Transient var marker: Marker?
+)
 
 val IMAGE_LIST_KEY = stringPreferencesKey("image_list")
 
@@ -52,8 +65,41 @@ class UriAdapter : JsonSerializer<Uri>, JsonDeserializer<Uri> {
     }
 }
 
+class LatLngAdapter : JsonSerializer<LatLng>, JsonDeserializer<LatLng> {
+    override fun serialize(
+        src: LatLng?,
+        typeOfSrc: Type?,
+        context: JsonSerializationContext?
+    ): JsonElement {
+        return if (src != null) {
+            JsonObject().apply {
+                addProperty("lat", src.latitude)
+                addProperty("lng", src.longitude)
+            }
+        } else {
+            JsonNull.INSTANCE
+        }
+    }
+
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?
+    ): LatLng? {
+        if (json == null || json.isJsonNull) return null
+        val obj = json.asJsonObject
+        val latElement = obj.get("lat")
+        val lngElement = obj.get("lng")
+        val lat = if (latElement != null && !latElement.isJsonNull) latElement.asDouble else null
+        val lng = if (lngElement != null && !lngElement.isJsonNull) lngElement.asDouble else null
+        return if (lat != null && lng != null) LatLng(lat, lng) else null
+    }
+
+}
+
 val gson: Gson = GsonBuilder()
     .registerTypeAdapter(Uri::class.java, UriAdapter())
+    .registerTypeAdapter(LatLng::class.java, LatLngAdapter())
     .create()
 
 suspend fun saveImageItemList(context: Context, itemList: List<ImageItem>) {
@@ -84,9 +130,17 @@ object DialogUtils {
         val imageView = dialogView.findViewById<ImageView>(R.id.dialogImage)
         val nameEditor = dialogView.findViewById<EditText>(R.id.editName)
         val descEditor = dialogView.findViewById<EditText>(R.id.editDesc)
+        val addressView = dialogView.findViewById<TextView>(R.id.addressView)
+        val phoneNumberView = dialogView.findViewById<TextView>(R.id.phoneNumberView)
         imageView.setImageURI(imageData.uri)
         nameEditor.setText(imageData.name)
         descEditor.setText(imageData.desc)
+        if (imageData.address != null) {
+            addressView.text = imageData.address
+        }
+        if (imageData.phoneNumber != null) {
+            phoneNumberView.text = imageData.phoneNumber
+        }
 
         var shouldReleasePermission = false
 
