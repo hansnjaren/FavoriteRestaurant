@@ -30,6 +30,10 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.*
 import com.google.android.libraries.places.api.net.*
+import android.widget.EditText
+import android.widget.Button
+
+
 
 class NotificationsFragment : Fragment(), OnMapReadyCallback {
 
@@ -58,6 +62,7 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
         )
         val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
 
+        //place api 초기화
         if (!Places.isInitialized()) {
             Places.initialize(
                 requireContext(),
@@ -66,12 +71,82 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
             )
         }
         placesClient = Places.createClient(requireContext())
-        //
-
-
+        //지도 초기화
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
+
+        //검색창 초기화
+        val searchInput = view.findViewById<EditText>(R.id.search_input)
+        val searchButton = view.findViewById<Button>(R.id.search_button)
+
+        searchButton.setOnClickListener {
+            val query = searchInput.text.toString()
+            if (query.isNotBlank()) {
+                searchPlace(query)
+            }
+        }
+
+
+
     }
+
+    //검색기능 추가
+    private fun searchPlace(query: String) {
+        val request = FindAutocompletePredictionsRequest.builder()
+            .setQuery(query)
+            .build()
+
+        placesClient.findAutocompletePredictions(request)
+            .addOnSuccessListener { response ->
+                if (response.autocompletePredictions.isNotEmpty()) {
+                    val prediction = response.autocompletePredictions[0]
+                    val placeId = prediction.placeId
+
+                    val placeFields = listOf(
+                        Place.Field.ID,
+                        Place.Field.DISPLAY_NAME,
+                        Place.Field.FORMATTED_ADDRESS,
+                        Place.Field.LOCATION,
+                        Place.Field.PHOTO_METADATAS,
+                        Place.Field.INTERNATIONAL_PHONE_NUMBER
+                    )
+
+                    val fetchPlaceRequest = FetchPlaceRequest.builder(placeId, placeFields).build()
+
+                    //  코루틴 비동기 처리 권장
+                    placesClient.fetchPlace(fetchPlaceRequest)
+                        .addOnSuccessListener { fetchResponse ->
+                            val place = fetchResponse.place
+
+                            // 사진 가져오기도 코루틴이나 background에서 실행
+                            val photoMetadata = place.photoMetadatas?.firstOrNull()
+                            if (photoMetadata != null) {
+                                val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                                    .setMaxWidth(600)
+                                    .setMaxHeight(400)
+                                    .build()
+
+                                placesClient.fetchPhoto(photoRequest)
+                                    .addOnSuccessListener { photoResponse ->
+                                        showPlaceDialog(place, photoResponse.bitmap)
+                                    }
+                                    .addOnFailureListener {
+                                        showPlaceDialog(place, null)
+                                    }
+                            } else {
+                                showPlaceDialog(place, null)
+                            }
+                        }
+                        .addOnFailureListener {
+                            Log.e("Search", "장소 정보 가져오기 실패: ${it.message}")
+                        }
+                }
+            }
+            .addOnFailureListener {
+                Log.e("Search", "자동완성 실패: ${it.message}")
+            }
+    }
+
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
