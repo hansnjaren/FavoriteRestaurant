@@ -13,7 +13,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.graphics.toColorInt
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -73,9 +73,9 @@ class DataAdapter(
 
         val params = holder.listElement.layoutParams as ViewGroup.MarginLayoutParams
         if (selectList[position]) {
-            holder.listElement.setBackgroundColor("#aaaaaa".toColorInt())
+            holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_select))
         } else {
-            holder.listElement.setBackgroundColor("#dddddd".toColorInt())
+            holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_default))
         }
         holder.listElement.layoutParams = params
         holder.listElement.requestLayout()
@@ -95,9 +95,9 @@ class DataAdapter(
                 }
                 selectList[position] = !selectList[position]
                 if (selectList[position]) {
-                    holder.listElement.setBackgroundColor("#aaaaaa".toColorInt())
+                    holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_select))
                 } else {
-                    holder.listElement.setBackgroundColor("#dddddd".toColorInt())
+                    holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_default))
                 }
                 holder.listElement.requestLayout()
             }

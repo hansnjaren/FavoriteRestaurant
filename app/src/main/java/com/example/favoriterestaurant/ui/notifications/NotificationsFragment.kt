@@ -16,11 +16,13 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import android.app.AlertDialog
+import android.content.res.Resources
 import androidx.lifecycle.lifecycleScope
 import com.example.favoriterestaurant.R
 import com.example.favoriterestaurant.utils.ImageItem
 import com.example.favoriterestaurant.utils.imageList
 import com.example.favoriterestaurant.utils.saveImageItemList
+import com.google.android.gms.maps.model.LatLngBounds
 import kotlinx.coroutines.launch
 import java.util.Locale
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -66,8 +68,9 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
-        val dgist = LatLng(35.7000, 128.4667)
-        googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(dgist, 15f))
+
+        val builder = LatLngBounds.Builder()
+        var counter = 0
 
         for (item in imageList) {
             if (item.coord != null) {
@@ -75,9 +78,28 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
                     googleMap?.addMarker(MarkerOptions().position(item.coord!!).title(item.name))
                 item.marker = marker
                 marker?.tag = item
+                builder.include(item.coord!!)
+                counter++
             }
         }
-        googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(dgist, 15f))
+
+        if (counter > 0) {
+            val bounds = builder.build()
+            if (counter == 1) {
+                googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.center, 15f))
+            }
+            else {
+                val displayMetrics = Resources.getSystem().displayMetrics
+                val width = displayMetrics.widthPixels
+                val padding = (width * 0.1).toInt()
+
+                googleMap?.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+            }
+        }
+        else {
+            val dgist = LatLng(35.7000, 128.4667)
+            googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(dgist, 15f))
+        }
 
         googleMap?.setOnPoiClickListener { poi ->
             val placeFields = listOf(
