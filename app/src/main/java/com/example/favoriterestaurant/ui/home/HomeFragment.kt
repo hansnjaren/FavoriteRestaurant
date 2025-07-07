@@ -11,7 +11,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -33,10 +35,15 @@ class DataAdapter(
     private val imageList: MutableList<ImageItem>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    var selectMode = false
+
+    private var selectList: MutableList<Boolean> = MutableList(imageList.size) { _ -> false }
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameView: TextView = view.findViewById(R.id.nameView)
         val descView: TextView = view.findViewById(R.id.descView)
         val smallImageView: ImageView = view.findViewById(R.id.smallImage)
+        val listElement: LinearLayout = view.findViewById(R.id.list_element)
 
 //        val debugOrderView: TextView = view.findViewById(R.id.debug_order)
     }
@@ -58,26 +65,61 @@ class DataAdapter(
         val name = imageData.name
         val desc = imageData.desc
         val uri = imageData.uri
+
+
+
+        if (selectList.size != imageList.size) selectList =
+            MutableList(imageList.size) { _ -> false }
+
+        val params = holder.listElement.layoutParams as ViewGroup.MarginLayoutParams
+        if (selectList[position]) {
+            holder.listElement.setBackgroundColor("#aaaaaa".toColorInt())
+        } else {
+            holder.listElement.setBackgroundColor("#dddddd".toColorInt())
+        }
+        holder.listElement.layoutParams = params
+        holder.listElement.requestLayout()
+
+
+
         listHolder.nameView.text = name
         listHolder.descView.text = desc
         listHolder.smallImageView.setImageURI(uri)
         listHolder.itemView.setOnClickListener {
-            DialogUtils.showImageDialog(
-                context = listHolder.itemView.context,
-                imageData = imageData,
-                imageList = imageList,
-                submitList = { newList -> submitList(newList) },
-                releasePermission = { uri ->
-                    try {
-                        listHolder.itemView.context.contentResolver.releasePersistableUriPermission(
-                            uri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        )
-                    } catch (e: SecurityException) {
-                        Log.d("MyTag", "no permission therefore not released")
-                    }
+
+
+            if (selectMode) {
+                Log.d("selecting", "selecting pictures")
+                if (selectList.size != imageList.size) {
+                    selectList = MutableList(imageList.size) { _ -> false }
                 }
-            )
+                selectList[position] = !selectList[position]
+                if (selectList[position]) {
+                    holder.listElement.setBackgroundColor("#aaaaaa".toColorInt())
+                } else {
+                    holder.listElement.setBackgroundColor("#dddddd".toColorInt())
+                }
+                holder.listElement.requestLayout()
+            }
+            else {
+                DialogUtils.showImageDialog(
+                    context = listHolder.itemView.context,
+                    imageData = imageData,
+                    imageList = imageList,
+                    submitList = { newList -> submitList(newList) },
+                    releasePermission = { uri ->
+                        try {
+                            listHolder.itemView.context.contentResolver.releasePersistableUriPermission(
+                                uri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            )
+                        } catch (e: SecurityException) {
+                            Log.d("MyTag", "no permission therefore not released")
+                        }
+                    }
+                )
+            }
+
         }
 
 //        listHolder.debugOrderView.text = imageData.order.toString()
@@ -120,6 +162,42 @@ class DataAdapter(
 //        }
 
         notifyItemMoved(from, to)
+    }
+
+
+    fun cancel() {
+        assert(imageList.size == selectList.size)
+        for (position in 0 until selectList.size) {
+            if (selectList[position]) {
+                selectList[position] = false
+                notifyItemChanged(position)
+            }
+        }
+    }
+
+    fun delete() {
+        assert(imageList.size == selectList.size)
+        var newList = imageList.toMutableList()
+        for (position in selectList.size - 1 downTo 0) {
+            if (selectList[position]) {
+                selectList[position] = false
+                newList = newList.apply { removeAt(position) }
+                try {
+                    context.contentResolver.releasePersistableUriPermission(
+                        imageList[position].uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (e: SecurityException) {
+                    // ignore
+                }
+            }
+        }
+        imageList.clear()
+        imageList.addAll(newList)
+        for (position in 0 until imageList.size) {
+            imageList[position].order = position
+        }
+        submitList(newList)
     }
 }
 
@@ -168,12 +246,16 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        val view: View = binding.root
 
         val recyclerView: RecyclerView = binding.dataView
         val queryView: EditText = binding.query
         val searchButtonView: Button = binding.searchButton
         val searchTextView: TextView = binding.searchText
+
+        val select = view.findViewById<Button>(R.id.list_select)
+        val delete = view.findViewById<Button>(R.id.list_delete)
+        val cancel = view.findViewById<Button>(R.id.list_cancel)
 
         var search = false
 
@@ -229,7 +311,33 @@ class HomeFragment : Fragment() {
             searchTextView.text = query
         }
 
-        return root
+        select.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: select, select mode: ${adapter.selectMode}")
+            select.visibility = View.GONE
+            delete.visibility = View.VISIBLE
+            cancel.visibility = View.VISIBLE
+        }
+
+        delete.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: delete, select mode: ${adapter.selectMode}")
+            adapter.delete()
+            select.visibility = View.VISIBLE
+            delete.visibility = View.GONE
+            cancel.visibility = View.GONE
+        }
+
+        cancel.setOnClickListener {
+            adapter.selectMode = !adapter.selectMode
+            Log.d("mode changer check", "action: cancel, select mode: ${adapter.selectMode}")
+            adapter.cancel()
+            select.visibility = View.VISIBLE
+            delete.visibility = View.GONE
+            cancel.visibility = View.GONE
+        }
+
+        return view
     }
 
     override fun onDestroyView() {

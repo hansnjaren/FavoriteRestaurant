@@ -88,7 +88,7 @@ class ImageAdapter(
                     context = holder.itemView.context,
                     imageData = imageData,
                     imageList = imageList,
-                    submitList = { newList -> submitList(newList) },
+                    submitList = { newList -> submitList(newList, false) },
                     releasePermission = { uri ->
                         try {
                             holder.itemView.context.contentResolver.releasePersistableUriPermission(
@@ -107,7 +107,7 @@ class ImageAdapter(
     override fun getItemCount(): Int = imageList.size
 
     // 데이터 갱신 메서드
-    fun submitList(newItems: List<ImageItem>) {
+    fun submitList(newItems: List<ImageItem>, add: Boolean) {
         val uriList: MutableList<Uri> = mutableListOf()
         for (image in imageList) {
             uriList.add(image.uri)
@@ -119,10 +119,17 @@ class ImageAdapter(
             else {
                 val position = imageList.map { it.uri }.indexOf(item.uri)
                 Log.d("submitList", position.toString())
-                imageList[position].order = item.order
+                if (!add) imageList[position].order = item.order
                 imageList[position].visible = item.visible
             }
         }
+
+        if (add) {
+            for ((counter, image) in imageList.withIndex()) {
+                image.order = counter
+            }
+        }
+
 //        imageList.sortBy { it.order }
         notifyDataSetChanged()
         CoroutineScope(Dispatchers.IO).launch {
@@ -157,12 +164,12 @@ class ImageAdapter(
                 }
             }
         }
+        imageList.clear()
+        imageList.addAll(newList)
         for (position in 0 until imageList.size) {
             imageList[position].order = position
         }
-        imageList.clear()
-        imageList.addAll(newList)
-        submitList(newList)
+        submitList(newList, false)
     }
 
     fun moveItem(from: Int, to: Int) {
@@ -204,7 +211,7 @@ class ItemTouchHelperCallback(private val adapter: ImageAdapter) : ItemTouchHelp
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        adapter.submitList(imageList.toMutableList())
+        adapter.submitList(imageList.toMutableList(), false)
     }
 }
 
@@ -238,7 +245,7 @@ class DashboardFragment : Fragment() {
                     )
                 )
             }
-            adapter.submitList(images)
+            adapter.submitList(images, true)
         }
     }
 
@@ -269,7 +276,7 @@ class DashboardFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             getImageItemListFlow(requireContext()).collect { loadedList ->
-                adapter.submitList(loadedList)
+                adapter.submitList(loadedList, false)
             }
         }
 
