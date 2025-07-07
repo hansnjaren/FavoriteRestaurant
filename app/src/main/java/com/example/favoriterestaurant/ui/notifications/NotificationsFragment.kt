@@ -16,6 +16,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import android.app.AlertDialog
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import androidx.lifecycle.lifecycleScope
 import com.example.favoriterestaurant.R
@@ -50,11 +51,17 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //
+        val context = requireContext()
+        val appInfo = context.packageManager.getApplicationInfo(
+            context.packageName,
+            PackageManager.GET_META_DATA
+        )
+        val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
+
         if (!Places.isInitialized()) {
             Places.initialize(
                 requireContext(),
-                getString(R.string.google_maps_key),
+                apiKey!!,
                 Locale.getDefault()
             )
         }
@@ -197,7 +204,7 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
             .setNegativeButton("추가") { _, _ ->
                 AlertDialog.Builder(context)
                     .setTitle("추가하기")
-                    .setItems(imageList.map { it.name }.toTypedArray()) { dialog, which ->
+                    .setItems(imageList.map { it.name }.toTypedArray()) { _, which ->
                         val newMarker = googleMap?.addMarker(
                             MarkerOptions()
                                 .position(place.location!!)

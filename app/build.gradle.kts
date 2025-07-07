@@ -1,3 +1,9 @@
+import java.util.Properties
+
+val properties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -14,6 +20,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        manifestPlaceholders["GOOGLE_API_KEY"] = properties.getProperty("api.key")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -40,8 +47,8 @@ android {
 
 dependencies {
 
-    implementation("com.google.android.gms:play-services-maps:18.1.0")
-    implementation("com.google.android.libraries.places:places:3.3.0")
+    implementation(libs.play.services.maps)
+    implementation(libs.places)
     implementation(libs.play.services.maps)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
