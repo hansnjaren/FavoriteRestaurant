@@ -8,6 +8,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -35,6 +37,8 @@ class DataAdapter(
         val nameView: TextView = view.findViewById(R.id.nameView)
         val descView: TextView = view.findViewById(R.id.descView)
         val smallImageView: ImageView = view.findViewById(R.id.smallImage)
+
+//        val debugOrderView: TextView = view.findViewById(R.id.debug_order)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,12 +48,13 @@ class DataAdapter(
     }
 
     override fun getItemCount(): Int {
-        return imageList.size
+        return imageList.count { image -> image.visible }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val listHolder = holder as ViewHolder
         val imageData = imageList[position]
+        if(!imageData.visible) return
         val name = imageData.name
         val desc = imageData.desc
         val uri = imageData.uri
@@ -75,6 +80,8 @@ class DataAdapter(
             )
         }
 
+//        listHolder.debugOrderView.text = imageData.order.toString()
+
     }
 
     fun submitList(newItems: List<ImageItem>) {
@@ -86,7 +93,14 @@ class DataAdapter(
             if (!uriList.contains(item.uri)) {
                 imageList.add(item)
             }
+            else {
+                val position = imageList.map { it.uri }.indexOf(item.uri)
+                Log.d("submitList", position.toString())
+                imageList[position].order = item.order
+                imageList[position].visible = item.visible
+            }
         }
+//        imageList.sortBy { it.order }
         notifyDataSetChanged()
         CoroutineScope(Dispatchers.IO).launch {
             saveImageItemList(context, imageList)
@@ -96,6 +110,15 @@ class DataAdapter(
     fun moveItem(from: Int, to: Int) {
         val item = imageList.removeAt(from)
         imageList.add(to, item)
+        imageList[from].order = from
+        imageList[to].order = to
+
+        Log.d("home", "from: $from, to: $to")
+
+//        for(position in from until to + 1) {
+//            imageList[position].order = position
+//        }
+
         notifyItemMoved(from, to)
     }
 }
@@ -122,6 +145,11 @@ class ItemTouchHelperCallback(private val adapter: DataAdapter) : ItemTouchHelpe
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         // ignore since no swipe motion detection needed
     }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        adapter.submitList(imageList.toMutableList())
+    }
 }
 
 class HomeFragment : Fragment() {
@@ -143,6 +171,18 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
 
         val recyclerView: RecyclerView = binding.dataView
+        val queryView: EditText = binding.query
+        val searchButtonView: Button = binding.searchButton
+        val searchTextView: TextView = binding.searchText
+
+        var search = false
+
+//        for (image in imageList) {
+//            image.visible = true
+//        }
+//        CoroutineScope(Dispatchers.IO).launch {
+//            saveImageItemList(requireContext(), imageList)
+//        }
 
         adapter = DataAdapter(requireContext(), imageList)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
@@ -150,6 +190,12 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             getImageItemListFlow(requireContext()).collect { loadedList ->
+                if (!search) {
+                    for (image in loadedList) {
+                        image.visible = true
+                    }
+                    queryView.setText("")
+                }
                 adapter.submitList(loadedList)
             }
         }
@@ -158,6 +204,31 @@ class HomeFragment : Fragment() {
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
+        searchButtonView.setOnClickListener {
+            val query = queryView.text.toString()
+            if (query.isEmpty()){
+                itemTouchHelper.attachToRecyclerView(recyclerView)
+                search = false
+            }
+            else{
+                itemTouchHelper.attachToRecyclerView(null)
+                search = true
+            }
+            val filteredList = imageList.filter { it.name.contains(query) }
+
+            for (position in 0 until imageList.size) {
+                imageList[position].visible = filteredList.contains(imageList[position])
+            }
+
+            imageList.sortWith(
+                compareByDescending<ImageItem> { it.visible }
+                    .thenBy { it.order }
+            )
+
+            adapter.submitList(imageList)
+            searchTextView.text = query
+        }
+
         return root
     }
 
@@ -165,4 +236,5 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

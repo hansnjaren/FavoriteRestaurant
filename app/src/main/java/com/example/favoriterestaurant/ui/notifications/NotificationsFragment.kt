@@ -185,6 +185,7 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
                         if (imageList[which].marker != null) {
                             imageList[which].marker!!.remove()
                         }
+                        imageList[which].name = name
                         imageList[which].address = address
                         imageList[which].phoneNumber = phone
                         imageList[which].coord = place.location!!

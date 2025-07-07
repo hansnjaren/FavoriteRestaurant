@@ -36,6 +36,8 @@ val imageList: MutableList<ImageItem> = mutableListOf()
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "image_items")
 
 data class ImageItem(
+    var order: Int,
+    var visible: Boolean,
     val uri: Uri,
     var name: String,
     var desc: String,

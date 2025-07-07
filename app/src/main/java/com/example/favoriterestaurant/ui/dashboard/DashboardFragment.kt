@@ -116,7 +116,14 @@ class ImageAdapter(
             if (!uriList.contains(item.uri)) {
                 imageList.add(item)
             }
+            else {
+                val position = imageList.map { it.uri }.indexOf(item.uri)
+                Log.d("submitList", position.toString())
+                imageList[position].order = item.order
+                imageList[position].visible = item.visible
+            }
         }
+//        imageList.sortBy { it.order }
         notifyDataSetChanged()
         CoroutineScope(Dispatchers.IO).launch {
             saveImageItemList(context, imageList)
@@ -150,6 +157,9 @@ class ImageAdapter(
                 }
             }
         }
+        for (position in 0 until imageList.size) {
+            imageList[position].order = position
+        }
         imageList.clear()
         imageList.addAll(newList)
         submitList(newList)
@@ -158,6 +168,12 @@ class ImageAdapter(
     fun moveItem(from: Int, to: Int) {
         val item = imageList.removeAt(from)
         imageList.add(to, item)
+        imageList[from].order = from
+        imageList[to].order = to
+        Log.d("dash", "from: $from, to: $to")
+        for(position in from until to + 1) {
+            imageList[position].order = position
+        }
         notifyItemMoved(from, to)
     }
 }
@@ -185,6 +201,11 @@ class ItemTouchHelperCallback(private val adapter: ImageAdapter) : ItemTouchHelp
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         // ignore since no swipe motion detection needed
     }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        adapter.submitList(imageList.toMutableList())
+    }
 }
 
 class DashboardFragment : Fragment() {
@@ -198,13 +219,15 @@ class DashboardFragment : Fragment() {
     ) { uris ->
         if (uris.isNotEmpty()) {
             val images: MutableList<ImageItem> = mutableListOf()
-            for (uri in uris) {
+            for ((counter, uri) in uris.withIndex()) {
                 requireContext().contentResolver.takePersistableUriPermission(
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
                 images.add(
                     ImageItem(
+                        order = imageList.size + counter,
+                        visible = true,
                         uri = uri,
                         name = "No name",
                         desc = "No description",
@@ -238,6 +261,7 @@ class DashboardFragment : Fragment() {
         val select = view.findViewById<Button>(R.id.select)
         val delete = view.findViewById<Button>(R.id.delete)
         val cancel = view.findViewById<Button>(R.id.cancel)
+
 
         adapter = ImageAdapter(requireContext(), imageList)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
