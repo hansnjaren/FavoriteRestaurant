@@ -173,7 +173,7 @@ class NotificationsFragment : Fragment(), OnMapReadyCallback {
             else {
                 val displayMetrics = Resources.getSystem().displayMetrics
                 val width = displayMetrics.widthPixels
-                val padding = (width * 0.1).toInt()
+                val padding = (width * 0.3).toInt()
 
                 googleMap?.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
             }

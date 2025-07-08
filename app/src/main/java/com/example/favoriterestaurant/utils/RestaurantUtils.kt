@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -139,9 +140,17 @@ object DialogUtils {
         descEditor.setText(imageData.desc)
         if (imageData.address != null) {
             addressView.text = imageData.address
+            addressView.visibility = View.VISIBLE
+        }
+        else {
+            addressView.visibility = View.GONE
         }
         if (imageData.phoneNumber != null) {
             phoneNumberView.text = imageData.phoneNumber
+            addressView.visibility = View.VISIBLE
+        }
+        else {
+            addressView.visibility = View.GONE
         }
 
         var shouldReleasePermission = false

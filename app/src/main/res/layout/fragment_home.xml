@@ -19,7 +19,8 @@
             android:hint="@string/query_default"
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
-            android:inputType="textMultiLine" />
+            android:maxLines="1"
+            android:inputType="text" />
 
         <Button
             android:id="@+id/search_button"
@@ -29,14 +30,44 @@
 
     </LinearLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2" >
+
+        <ImageView
+            android:id="@+id/header_image"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/image_header"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:fontFamily="@font/google_sans_compat"
+            android:textSize="@dimen/title_textSize"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/is_query"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical" />
+
+        <TextView
             android:id="@+id/search_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:gravity="center_vertical" />
 
         <View
             android:layout_width="0dp"
@@ -68,6 +99,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/dataView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="3"/>
 
 </LinearLayout>
