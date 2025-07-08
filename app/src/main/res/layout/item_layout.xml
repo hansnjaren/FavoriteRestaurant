@@ -3,10 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/default_margin"
-    android:background="@color/list_default"
+    android:background="@drawable/list_default_bg"
     android:orientation="horizontal"
     android:padding="@dimen/default_margin"
-    android:id="@+id/list_element" >
+    android:id="@+id/list_element"
+    >
 
     <ImageView
         android:id="@+id/smallImage"
@@ -14,6 +15,7 @@
         android:layout_height="match_parent"
         android:layout_marginEnd="@dimen/default_margin"
         android:layout_weight="1"
+        android:background="@drawable/list_default_bg"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop" />
 

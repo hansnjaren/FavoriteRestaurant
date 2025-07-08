@@ -3,17 +3,19 @@ package com.example.favoriterestaurant.ui.home
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -73,9 +75,11 @@ class DataAdapter(
 
         val params = holder.listElement.layoutParams as ViewGroup.MarginLayoutParams
         if (selectList[position]) {
-            holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_select))
+//            holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_select))
+            holder.listElement.setBackgroundResource(R.drawable.list_selected_bg)
         } else {
-            holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_default))
+//            holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_default))
+            holder.listElement.setBackgroundResource(R.drawable.list_default_bg)
         }
         holder.listElement.layoutParams = params
         holder.listElement.requestLayout()
@@ -85,9 +89,11 @@ class DataAdapter(
         listHolder.nameView.text = name
         listHolder.descView.text = desc
         listHolder.smallImageView.setImageURI(uri)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            listHolder.smallImageView.clipToOutline = true
+        }
+
         listHolder.itemView.setOnClickListener {
-
-
             if (selectMode) {
                 Log.d("selecting", "selecting pictures")
                 if (selectList.size != imageList.size) {
@@ -95,9 +101,11 @@ class DataAdapter(
                 }
                 selectList[position] = !selectList[position]
                 if (selectList[position]) {
-                    holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_select))
+//                    holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_select))
+                    holder.listElement.setBackgroundResource(R.drawable.list_selected_bg)
                 } else {
-                    holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_default))
+//                    holder.listElement.setBackgroundColor(ContextCompat.getColor(context, R.color.list_default))
+                    holder.listElement.setBackgroundResource(R.drawable.list_default_bg)
                 }
                 holder.listElement.requestLayout()
             }
@@ -252,6 +260,8 @@ class HomeFragment : Fragment() {
         val queryView: EditText = binding.query
         val searchButtonView: Button = binding.searchButton
         val searchTextView: TextView = binding.searchText
+        val headerImageView: ImageView = binding.headerImage
+        val isQueryView: TextView = binding.isQuery
 
         val select = view.findViewById<Button>(R.id.list_select)
         val delete = view.findViewById<Button>(R.id.list_delete)
@@ -265,6 +275,8 @@ class HomeFragment : Fragment() {
 //        CoroutineScope(Dispatchers.IO).launch {
 //            saveImageItemList(requireContext(), imageList)
 //        }
+
+        val images = listOf(R.drawable.header0, R.drawable.header1, R.drawable.header2, R.drawable.header3)
 
         adapter = DataAdapter(requireContext(), imageList)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
@@ -288,11 +300,14 @@ class HomeFragment : Fragment() {
 
         searchButtonView.setOnClickListener {
             val query = queryView.text.toString()
+
             if (query.isEmpty()){
+                isQueryView.text = ""
                 itemTouchHelper.attachToRecyclerView(recyclerView)
                 search = false
             }
             else{
+                isQueryView.text = getString(R.string.if_query)
                 itemTouchHelper.attachToRecyclerView(null)
                 search = true
             }
@@ -314,6 +329,7 @@ class HomeFragment : Fragment() {
         select.setOnClickListener {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: select, select mode: ${adapter.selectMode}")
+            itemTouchHelper.attachToRecyclerView(null)
             select.visibility = View.GONE
             delete.visibility = View.VISIBLE
             cancel.visibility = View.VISIBLE
@@ -323,6 +339,7 @@ class HomeFragment : Fragment() {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: delete, select mode: ${adapter.selectMode}")
             adapter.delete()
+            itemTouchHelper.attachToRecyclerView(recyclerView)
             select.visibility = View.VISIBLE
             delete.visibility = View.GONE
             cancel.visibility = View.GONE
@@ -332,9 +349,24 @@ class HomeFragment : Fragment() {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: cancel, select mode: ${adapter.selectMode}")
             adapter.cancel()
+            itemTouchHelper.attachToRecyclerView(recyclerView)
             select.visibility = View.VISIBLE
             delete.visibility = View.GONE
             cancel.visibility = View.GONE
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (true) {
+                if(imageList.size < 1) {
+                    val imageIndex = java.util.Random().nextInt(images.size)
+                    headerImageView.setImageResourceWithFade(images[imageIndex])
+                }
+                else {
+                    val imageIndex = java.util.Random().nextInt(imageList.size)
+                    headerImageView.setImageURIWithFade(imageList[imageIndex].uri)
+                }
+                kotlinx.coroutines.delay(3000)
+            }
         }
 
         return view
@@ -343,6 +375,46 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun ImageView.setImageResourceWithFade(resId: Int, duration: Long = 500) {
+        val fadeOut = AlphaAnimation(1f, 0.8f).apply {
+            this.duration = duration
+            fillAfter = true
+        }
+        val fadeIn = AlphaAnimation(0.8f, 1f).apply {
+            this.duration = duration
+            fillAfter = true
+        }
+        fadeOut.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationEnd(animation: Animation?) {
+                setImageResource(resId)
+                startAnimation(fadeIn)
+            }
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
+        startAnimation(fadeOut)
+    }
+
+    private fun ImageView.setImageURIWithFade(uri: Uri, duration: Long = 500) {
+        val fadeOut = AlphaAnimation(1f, 0.8f).apply {
+            this.duration = duration
+            fillAfter = true
+        }
+        val fadeIn = AlphaAnimation(0.8f, 1f).apply {
+            this.duration = duration
+            fillAfter = true
+        }
+        fadeOut.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {}
+            override fun onAnimationEnd(animation: Animation?) {
+                setImageURI(uri)
+                startAnimation(fadeIn)
+            }
+            override fun onAnimationRepeat(animation: Animation?) {}
+        })
+        startAnimation(fadeOut)
     }
 
 }

@@ -13,4 +13,6 @@
     <string name="delete">삭제</string>
     <string name="search">검색</string>
     <string name="query_default">검색어를 입력하세요. </string>
+    <string name="image_header">오늘의 추천</string>
+    <string name="if_query">검색어:&#160;</string>
 </resources>
