@@ -278,20 +278,6 @@ class HomeFragment : Fragment() {
 
         val images = listOf(R.drawable.header0, R.drawable.header1, R.drawable.header2, R.drawable.header3)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            while (true) {
-                if(imageList.size < 1) {
-                    val imageIndex = java.util.Random().nextInt(images.size)
-                    headerImageView.setImageResourceWithFade(images[imageIndex])
-                }
-                else {
-                    val imageIndex = java.util.Random().nextInt(imageList.size)
-                    headerImageView.setImageURIWithFade(imageList[imageIndex].uri)
-                }
-                kotlinx.coroutines.delay(3000)
-            }
-        }
-
         adapter = DataAdapter(requireContext(), imageList)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
         recyclerView.adapter = adapter
@@ -367,6 +353,20 @@ class HomeFragment : Fragment() {
             select.visibility = View.VISIBLE
             delete.visibility = View.GONE
             cancel.visibility = View.GONE
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            while (true) {
+                if(imageList.size < 1) {
+                    val imageIndex = java.util.Random().nextInt(images.size)
+                    headerImageView.setImageResourceWithFade(images[imageIndex])
+                }
+                else {
+                    val imageIndex = java.util.Random().nextInt(imageList.size)
+                    headerImageView.setImageURIWithFade(imageList[imageIndex].uri)
+                }
+                kotlinx.coroutines.delay(3000)
+            }
         }
 
         return view

@@ -14,5 +14,5 @@
     <string name="search">Search</string>
     <string name="query_default">Put name to search. </string>
     <string name="image_header">Today\'s Pick</string>
-    <string name="if_query">Search:</string>
+    <string name="if_query">Search:&#160;</string>
 </resources>
