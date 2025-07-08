@@ -14,5 +14,15 @@
         <!-- Customize your theme here. -->
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowActionBarOverlay">true</item>
+
+        <item name="android:windowBackground">@android:color/white</item>
+
+
     </style>
+
+    <style name="Theme.MyApp.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background_color</item> <!-- 필수 -->
+    </style>
+
+
 </resources>

@@ -12,5 +12,6 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="search">Search</string>
+
     <string name="query_default">Put name to search. </string>
 </resources>

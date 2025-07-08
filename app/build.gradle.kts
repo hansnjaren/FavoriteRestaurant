@@ -48,6 +48,7 @@ android {
 dependencies {
 
     implementation(libs.play.services.maps)
+    implementation ("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.places)
     implementation(libs.play.services.maps)
     implementation(libs.androidx.core.ktx)
