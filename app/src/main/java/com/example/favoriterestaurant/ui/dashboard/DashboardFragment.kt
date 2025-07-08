@@ -291,6 +291,7 @@ class DashboardFragment : Fragment() {
         select.setOnClickListener {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: select, select mode: ${adapter.selectMode}")
+            itemTouchHelper.attachToRecyclerView(null)
             select.visibility = View.GONE
             delete.visibility = View.VISIBLE
             cancel.visibility = View.VISIBLE
@@ -300,6 +301,7 @@ class DashboardFragment : Fragment() {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: delete, select mode: ${adapter.selectMode}")
             adapter.delete()
+            itemTouchHelper.attachToRecyclerView(recyclerView)
             select.visibility = View.VISIBLE
             delete.visibility = View.GONE
             cancel.visibility = View.GONE
@@ -309,6 +311,7 @@ class DashboardFragment : Fragment() {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: cancel, select mode: ${adapter.selectMode}")
             adapter.cancel()
+            itemTouchHelper.attachToRecyclerView(recyclerView)
             select.visibility = View.VISIBLE
             delete.visibility = View.GONE
             cancel.visibility = View.GONE

@@ -323,7 +323,6 @@ class HomeFragment : Fragment() {
             else{
                 isQueryView.text = getString(R.string.if_query)
                 itemTouchHelper.attachToRecyclerView(null)
-                headerImageView.setOnClickListener(null)
                 search = true
             }
             val filteredList = imageList.filter { it.name.contains(query) }
@@ -344,7 +343,7 @@ class HomeFragment : Fragment() {
         select.setOnClickListener {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: select, select mode: ${adapter.selectMode}")
-            headerImageView.setOnClickListener(null)
+            itemTouchHelper.attachToRecyclerView(null)
             select.visibility = View.GONE
             delete.visibility = View.VISIBLE
             cancel.visibility = View.VISIBLE
@@ -354,6 +353,7 @@ class HomeFragment : Fragment() {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: delete, select mode: ${adapter.selectMode}")
             adapter.delete()
+            itemTouchHelper.attachToRecyclerView(recyclerView)
             select.visibility = View.VISIBLE
             delete.visibility = View.GONE
             cancel.visibility = View.GONE
@@ -363,6 +363,7 @@ class HomeFragment : Fragment() {
             adapter.selectMode = !adapter.selectMode
             Log.d("mode changer check", "action: cancel, select mode: ${adapter.selectMode}")
             adapter.cancel()
+            itemTouchHelper.attachToRecyclerView(recyclerView)
             select.visibility = View.VISIBLE
             delete.visibility = View.GONE
             cancel.visibility = View.GONE
