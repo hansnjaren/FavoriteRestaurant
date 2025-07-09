@@ -117,7 +117,7 @@ class DataAdapter(
                     context = listHolder.itemView.context,
                     imageData = imageData,
                     imageList = imageList,
-                    submitList = { newList -> submitList(newList) },
+                    submitList = { newList -> submitList(newList, false) },
                     releasePermission = { uri ->
                         try {
                             listHolder.itemView.context.contentResolver.releasePersistableUriPermission(
@@ -137,7 +137,7 @@ class DataAdapter(
 
     }
 
-    fun submitList(newItems: List<ImageItem>) {
+    fun submitList(newItems: List<ImageItem>, search: Boolean) {
         val uriList: MutableList<Uri> = mutableListOf()
         for (image in imageList) {
             uriList.add(image.uri)
@@ -149,9 +149,14 @@ class DataAdapter(
             else {
                 val position = imageList.map { it.uri }.indexOf(item.uri)
                 Log.d("submitList", position.toString())
-                imageList[position].order = item.order
+                if (!search) {
+                    imageList[position].order = item.order
+                }
                 imageList[position].visible = item.visible
             }
+        }
+        if (!search) {
+            imageList.sortBy { it.order }
         }
 //        imageList.sortBy { it.order }
         notifyDataSetChanged()
@@ -208,7 +213,7 @@ class DataAdapter(
         for (position in 0 until imageList.size) {
             imageList[position].order = position
         }
-        submitList(newList)
+        submitList(newList, false)
     }
 }
 
@@ -237,7 +242,7 @@ class ItemTouchHelperCallback(private val adapter: DataAdapter) : ItemTouchHelpe
 
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         super.clearView(recyclerView, viewHolder)
-        adapter.submitList(imageList.toMutableList())
+        adapter.submitList(imageList.toMutableList(), false)
     }
 }
 
@@ -290,12 +295,17 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             getImageItemListFlow(requireContext()).collect { loadedList ->
                 if (!search) {
+                    var nonVisible = false
                     for (image in loadedList) {
+                        Log.d("visible", image.visible.toString())
+                        Log.d("order", image.order.toString())
+                        if(!image.visible) nonVisible = true
                         image.visible = true
                     }
                     queryView.setText("")
+                    if (nonVisible) loadedList.sortedBy { it.order }
                 }
-                adapter.submitList(loadedList)
+                adapter.submitList(loadedList, search)
             }
         }
 
@@ -342,7 +352,7 @@ class HomeFragment : Fragment() {
                     .thenBy { it.order }
             )
 
-            adapter.submitList(imageList)
+            adapter.submitList(imageList, query.isNotEmpty())
             searchTextView.text = query
         }
 

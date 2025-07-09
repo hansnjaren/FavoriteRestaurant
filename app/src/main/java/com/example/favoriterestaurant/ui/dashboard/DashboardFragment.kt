@@ -145,7 +145,7 @@ class ImageAdapter(
             }
         }
 
-//        imageList.sortBy { it.order }
+        imageList.sortBy { it.order }
         notifyDataSetChanged()
         CoroutineScope(Dispatchers.IO).launch {
             saveImageItemList(context, imageList)
@@ -303,6 +303,14 @@ class DashboardFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             getImageItemListFlow(requireContext()).collect { loadedList ->
+                var nonVisible = false
+                for (image in loadedList) {
+                    Log.d("visible", image.visible.toString())
+                    Log.d("order", image.order.toString())
+                    if(!image.visible) nonVisible = true
+                    image.visible = true
+                }
+                if (nonVisible) loadedList.sortedBy { it.order }
                 adapter.submitList(loadedList, false)
             }
         }

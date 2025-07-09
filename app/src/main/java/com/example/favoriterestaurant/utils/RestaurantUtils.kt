@@ -106,7 +106,7 @@ val gson: Gson = GsonBuilder()
     .create()
 
 suspend fun saveImageItemList(context: Context, itemList: List<ImageItem>) {
-    val json = gson.toJson(itemList)
+    val json = gson.toJson(itemList.toList())
     context.dataStore.edit { prefs ->
         prefs[IMAGE_LIST_KEY] = json
     }
