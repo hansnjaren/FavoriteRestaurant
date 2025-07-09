@@ -6,17 +6,20 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.setMargins
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -45,6 +48,7 @@ class ImageAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.imageView)
+        val imageViewPadding: FrameLayout = view.findViewById(R.id.imageViewPadding)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -61,14 +65,17 @@ class ImageAdapter(
         if (selectList.size != imageList.size) selectList =
             MutableList(imageList.size) { _ -> false }
 
-        val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+        // val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+//        val paddingParams = holder.imageViewPadding.layoutParams as ViewGroup.MarginLayoutParams
         if (selectList[position]) {
-            params.setMargins(16)
+//            paddingParams.setMargins(16)
+            holder.imageViewPadding.setPadding(16)
         } else {
-            params.setMargins(0)
+//            paddingParams.setMargins(0)
+            holder.imageViewPadding.setPadding(0)
         }
-        holder.imageView.layoutParams = params
-        holder.imageView.requestLayout()
+//        holder.imageViewPadding.layoutParams = paddingParams
+        holder.imageViewPadding.requestLayout()
 
 
 
@@ -79,14 +86,18 @@ class ImageAdapter(
                     selectList = MutableList(imageList.size) { _ -> false }
                 }
                 selectList[position] = !selectList[position]
-                val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+
+                // val params = holder.imageView.layoutParams as ViewGroup.MarginLayoutParams
+//                val paddingParams = holder.imageViewPadding.layoutParams as ViewGroup.MarginLayoutParams
                 if (selectList[position]) {
-                    params.setMargins(16)
+//            paddingParams.setMargins(16)
+                    holder.imageViewPadding.setPadding(16)
                 } else {
-                    params.setMargins(0)
+//            paddingParams.setMargins(0)
+                    holder.imageViewPadding.setPadding(0)
                 }
-                holder.imageView.layoutParams = params
-                holder.imageView.requestLayout()
+//                holder.imageViewPadding.layoutParams = paddingParams
+                holder.imageViewPadding.requestLayout()
             } else {
                 DialogUtils.showImageDialog(
                     context = holder.itemView.context,
@@ -238,12 +249,21 @@ class DashboardFragment : Fragment() {
                     uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
+                val projection = arrayOf(OpenableColumns.DISPLAY_NAME)
+                val cursor = requireContext().contentResolver.query(uri, projection, null, null, null)
+                var fileName = ""
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        fileName = it.getString(nameIndex)
+                    }
+                }
                 images.add(
                     ImageItem(
                         order = imageList.size + counter,
                         visible = true,
                         uri = uri,
-                        name = "No name",
+                        name = fileName,
                         desc = "No description",
                         address = null,
                         phoneNumber = null,
