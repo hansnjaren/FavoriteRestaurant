@@ -61,7 +61,8 @@
 
 **영상**
 
-TODO
+![list](https://github.com/user-attachments/assets/ca506a4a-bdf0-4aa4-828e-84db59abd8b8)
+
 
 ### Tab2 : **사진 기반 맛집 뷰 (Photo View)**
 
@@ -80,7 +81,8 @@ TODO
 
 **영상**
 
-TODO
+![pics](https://github.com/user-attachments/assets/b27c3400-be57-4a55-98fb-89682c0adc73)
+
 
 ### Tab3 :  지도 기반 맛집 뷰 (Map View)
 
@@ -94,11 +96,13 @@ TODO
 
 **영상**
 
-TODO
+![map](https://github.com/user-attachments/assets/a914ed77-7ac2-4357-8704-01dd713f007a)
+
 
 ## 사용방법
 
-영상 TODO
+![all](https://github.com/user-attachments/assets/08a8b54f-3244-457f-a59f-8bd9a162d719)
+
 
 ## 팀원
 ### [김현승(hansnjaren)](https://github.com/hansnjaren)
