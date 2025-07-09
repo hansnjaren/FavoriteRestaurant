@@ -46,20 +46,20 @@
 
 - splah screen
     
-    ![image.png](attachment:4b8dd687-ffca-4b43-b3e3-f2cd03dcc4e3:image.png)
-    
+![image.png](attachment:4b8dd687-ffca-4b43-b3e3-f2cd03dcc4e3:image.png)
 
 - list screen
 
-![image.png](attachment:2d88e58b-dd61-4112-bc33-27edd66b0e5f:image.png)
+![image](https://github.com/user-attachments/assets/013cd110-9b9f-4f1f-b3a3-a0811f9a4f66)
 
 - image screen
 
-![image.png](attachment:6269d47c-ce0e-41c9-a921-f65066c83477:image.png)
+![image](https://github.com/user-attachments/assets/446dab5f-509e-4545-b40f-f6c6fff7f85d)
+
 
 - map screen
+![image](https://github.com/user-attachments/assets/b4b891d6-6731-4632-9c41-bcee7d17fe27)
 
-![image.png](attachment:0cbb6cfc-3488-488e-adac-71150c6452ef:image.png)
 
 ## Tab 소개
 ### Tab1 : 나만의 맛집 리스트 (My List)
