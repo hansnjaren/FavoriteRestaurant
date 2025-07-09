@@ -41,6 +41,26 @@
   - 리스트: 한 줄 평가, 정렬 
   - 갤러리: 사진 중심의 시각적 탐색
 
+
+# 또갈집 : 나만의 맛집을 더욱 간편하게
+
+- splah screen
+    
+    ![image.png](attachment:4b8dd687-ffca-4b43-b3e3-f2cd03dcc4e3:image.png)
+    
+
+- list screen
+
+![image.png](attachment:2d88e58b-dd61-4112-bc33-27edd66b0e5f:image.png)
+
+- image screen
+
+![image.png](attachment:6269d47c-ce0e-41c9-a921-f65066c83477:image.png)
+
+- map screen
+
+![image.png](attachment:0cbb6cfc-3488-488e-adac-71150c6452ef:image.png)
+
 ## Tab 소개
 ### Tab1 : 나만의 맛집 리스트 (My List)
 
