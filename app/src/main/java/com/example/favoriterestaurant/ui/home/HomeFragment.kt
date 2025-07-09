@@ -6,11 +6,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -244,6 +247,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var adapter: DataAdapter
 
+    private var index = 0
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -297,6 +302,21 @@ class HomeFragment : Fragment() {
         val callback = ItemTouchHelperCallback(adapter)
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
+
+        searchTextView.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_GO ||
+                actionId == EditorInfo.IME_ACTION_NEXT ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+            ) {
+                // 키보드 내리기
+                val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(searchTextView.windowToken, 0)
+                true // 이벤트 소비
+            } else {
+                false
+            }
+        }
 
         searchButtonView.setOnClickListener {
             val query = queryView.text.toString()
@@ -358,12 +378,12 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             while (true) {
                 if(imageList.size < 1) {
-                    val imageIndex = java.util.Random().nextInt(images.size)
-                    headerImageView.setImageResourceWithFade(images[imageIndex])
+                    index %= images.size
+                    headerImageView.setImageResourceWithFade(images[index++])
                 }
                 else {
-                    val imageIndex = java.util.Random().nextInt(imageList.size)
-                    headerImageView.setImageURIWithFade(imageList[imageIndex].uri)
+                    index %= imageList.size
+                    headerImageView.setImageURIWithFade(imageList[index++].uri)
                 }
                 kotlinx.coroutines.delay(3000)
             }

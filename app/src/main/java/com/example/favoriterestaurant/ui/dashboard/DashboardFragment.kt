@@ -1,7 +1,9 @@
 package com.example.favoriterestaurant.ui.dashboard
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +14,8 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.setMargins
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -221,8 +225,11 @@ class DashboardFragment : Fragment() {
 
     private lateinit var adapter: ImageAdapter
 
+    private val REQUEST_CODE = 1001
+
     private val pickImages = registerForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia()
+//        ActivityResultContracts.PickMultipleVisualMedia()
+        ActivityResultContracts.OpenMultipleDocuments()
     ) { uris ->
         if (uris.isNotEmpty()) {
             val images: MutableList<ImageItem> = mutableListOf()
@@ -285,7 +292,14 @@ class DashboardFragment : Fragment() {
         itemTouchHelper.attachToRecyclerView(recyclerView)
 
         buttonSelectImages.setOnClickListener {
-            pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this.requireActivity(), arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CODE)
+            }
+            else {
+//                pickImages.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                pickImages.launch(arrayOf("image/*"))
+            }
         }
 
         select.setOnClickListener {
@@ -323,5 +337,12 @@ class DashboardFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            pickImages.launch(arrayOf("image/*"))
+        }
     }
 }

@@ -35,22 +35,41 @@
     <ImageView
         android:id="@+id/dialogImage"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop"
-        android:textSize="@dimen/desc_textSize" />
+        android:textSize="@dimen/desc_textSize"
+        android:layout_marginBottom="@dimen/default_margin" />
 
-    <EditText
-        android:id="@+id/editDesc"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:breakStrategy="simple"
-        android:hint="@string/desc_hint"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:maxLines="5"
-        android:minLines="1"
-        android:singleLine="false"
-        android:textSize="@dimen/desc_textSize" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/list_default"
+        android:padding="8dp" >
+
+        <TextView
+            android:text="@string/memo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="@dimen/desc_textSize"
+            android:layout_marginStart="4dp" />
+
+        <EditText
+            android:id="@+id/editDesc"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:breakStrategy="simple"
+            android:hint="@string/desc_hint"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:maxLines="5"
+            android:minLines="1"
+            android:singleLine="false"
+            android:textSize="@dimen/desc_textSize" />
+
+    </LinearLayout>
 
 </LinearLayout>

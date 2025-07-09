@@ -10,6 +10,8 @@
     <color name="list_select">#AAAAAA</color>
     <color name="list_default">#DDDDDD</color>
     <color name="splash_background_color">#26340A</color>
+    <color name="text_background">#80000000</color>
+    <color name="memo_background">#4026340A</color>
 
     <color name="main_color">#233000</color>
 </resources>

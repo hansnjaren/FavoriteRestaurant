@@ -10,7 +10,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <EditText
             android:id="@+id/query"
@@ -20,7 +22,8 @@
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
             android:maxLines="1"
-            android:inputType="text" />
+            android:inputType="text"
+            android:imeOptions="actionDone" />
 
         <Button
             android:id="@+id/search_button"
@@ -45,11 +48,12 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/image_header"
+            android:background="@color/text_background"
+            android:fontFamily="@font/playfair_display"
             android:gravity="center"
+            android:text="@string/image_header"
             android:textColor="@color/white"
-            android:fontFamily="@font/google_sans_compat"
-            android:textSize="@dimen/title_textSize"/>
+            android:textSize="@dimen/title_textSize" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
     

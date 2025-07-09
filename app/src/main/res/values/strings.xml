@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Favorite Restaurant</string>
+    <string name="app_name">The Best of the Best</string>
     <string name="title_home">List</string>
     <string name="title_dashboard">Images</string>
     <string name="title_notifications">Map</string>
@@ -12,8 +12,9 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="search">Search</string>
+    <string name="memo">Memo</string>
 
     <string name="query_default">Put name to search. </string>
-    <string name="image_header">Today\'s Pick</string>
+    <string name="image_header">Memory of the taste</string>
     <string name="if_query">Search:&#160;</string>
 </resources>
