@@ -44,23 +44,9 @@
 
 # 또갈집 : 나만의 맛집을 더욱 간편하게
 
-- splah screen
-    
-![image](https://github.com/user-attachments/assets/a43265ef-9b1b-4a88-bb36-8de57ef2e9a5)
-
-
-- list screen
-
-![image](https://github.com/user-attachments/assets/013cd110-9b9f-4f1f-b3a3-a0811f9a4f66)
-
-- image screen
-
-![image](https://github.com/user-attachments/assets/446dab5f-509e-4545-b40f-f6c6fff7f85d)
-
-
-- map screen
-![image](https://github.com/user-attachments/assets/b4b891d6-6731-4632-9c41-bcee7d17fe27)
-
+|splash screen|list screen|image screen|map screen|
+|--|--|--|--|
+|<img src="https://github.com/user-attachments/assets/a43265ef-9b1b-4a88-bb36-8de57ef2e9a5" width="225" height="400" />|<img src="https://github.com/user-attachments/assets/013cd110-9b9f-4f1f-b3a3-a0811f9a4f66" width="225" height="400" />|<img src="https://github.com/user-attachments/assets/446dab5f-509e-4545-b40f-f6c6fff7f85d" width="225" height="400" />|<img src="https://github.com/user-attachments/assets/b4b891d6-6731-4632-9c41-bcee7d17fe27" width="225" height="400" />|
 
 ## Tab 소개
 ### Tab1 : 나만의 맛집 리스트 (My List)
