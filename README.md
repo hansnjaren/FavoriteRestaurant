@@ -46,7 +46,8 @@
 
 - splah screen
     
-![image.png](attachment:4b8dd687-ffca-4b43-b3e3-f2cd03dcc4e3:image.png)
+![image](https://github.com/user-attachments/assets/a43265ef-9b1b-4a88-bb36-8de57ef2e9a5)
+
 
 - list screen
 
